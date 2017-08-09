@@ -44,20 +44,14 @@ Land surface and sea surface data types are:
 LSD - 1/2/3/4/140/
 SSD - 9/11/12/13/14/19/20/21/22/23/
 
-LK said not to worry about Reduced COADS data - #20
+Liz Kent said not to worry about Reduced COADS data - #20
 """
 
 
 #*************************************************************
 def run_mars_request(start, end, outfile):
-    """
-    Run MARS request and save the output to `outfile`.
-    
-    :param start: start date
-    :param end: end date
-    :return: None
-    """
-    mars_request = {
+
+    server.execute({
             # Specify the ERA-Interim data archive. Don't change.
             "class": "od", # operational data
             "expver": "1", # version of the data
@@ -67,24 +61,38 @@ def run_mars_request(start, end, outfile):
             "stream": "oper", # operational atmospheric model
             "time": "00:00:00/03:00:00/06:00:00/09:00:00/12:00:00/15:00:00/18:00:00/21:00:00", # all 3 hourly timesteps
             "type": "ob", # observations
-            }
-            
-    server.execute(mars_request, outfile)
-    return
+            },
+                   outfile
+                   )
+
+    return # run_mars_request
 
 #*************************************************************
 #*************************************************************
 SplitMonths = False
 
+today = dt.datetime.now()
+
 
 # spin through each year
-for year in range(1979, dt.datetime.now().year + 1):
+#for year in range(1979, dt.datetime.now().year + 1):
+for year in range(2017, dt.datetime.now().year + 1):
 
 
     if SplitMonths:
 
         # spin through each month
         for month in (1 + np.arange(12)):
+	
+            start = dt.datetime.strftime(dt.datetime(year,month,1), "%Y-%m-%d")
+	    if year == today.year and month == today.month:
+                end = dt.datetime.strftime(today, "%Y-%m-%d")
+	    elif year == today.year and month > today.month:
+	        break	
+	    else:
+                end = dt.datetime.strftime(dt.datetime(year,month,calendar.monthrange(year,month)[1]), "%Y-%m-%d")
+
+	    	
 
             # set up the start and end dates in correct format
             start = dt.datetime.strftime(dt.datetime(year,month,1), "%Y-%m-%d")
@@ -98,21 +106,23 @@ for year in range(1979, dt.datetime.now().year + 1):
 
             run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename))      
 
-            break
     else:
         
         start = dt.datetime.strftime(dt.datetime(year,1,1), "%Y-%m-%d")
-        end = dt.datetime.strftime(dt.datetime(year,12,31), "%Y-%m-%d")
+	
+	if year == today.year:
+            end = dt.datetime.strftime(today, "%Y-%m-%d")
+	else:
+            end = dt.datetime.strftime(dt.datetime(year,12,31), "%Y-%m-%d")
 
         # make output filename
-        filename = "mars_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,month,1), "%Y"))
+        filename = "mars_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,1,1), "%Y"))
 
         # replace with run request and GWS once ready
         print start, end, filename
 
         run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename))      
 
-        break
 
 print "finished"
 
