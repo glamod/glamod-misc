@@ -74,7 +74,7 @@ def run_mars_request(start, end, outfile, datatype = "synop"):
                 "date": "{}/to/{}".format(start,end), # date range to extract
                 "obstype": "1/2/3/4/140/9/11/12/13/14/19/21/22/23", 
                 "stream": "oper", # operational atmospheric model
-                "repres": "bu" # representation of archived data (Adrian Simmons used this in his request, 19/9/17)
+                "repres": "bu", # representation of archived data (Adrian Simmons used this in his request, 19/9/17)
                 "time": "00:00:00/03:00:00/06:00:00/09:00:00/12:00:00/15:00:00/18:00:00/21:00:00", # all 3 hourly timesteps
                 "type": "ai", # observations
                 },
@@ -95,8 +95,7 @@ elif datatype == "era40":
     start = 1957
 
 # spin through each year
-#for year in range(start, dt.datetime.now().year + 1):
-for year in range(1960, 1961):
+for year in range(start, dt.datetime.now().year + 1):
 
 
     if SplitMonths:
@@ -118,9 +117,9 @@ for year in range(1960, 1961):
             # replace with run request and GWS once ready
             print start, end, filename
 
-            run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename, datatype = datatype))      
+            run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename), datatype = datatype)      
 
-            break
+#            break
     else:
         
         start = dt.datetime.strftime(dt.datetime(year,1,1), "%Y-%m-%d")
@@ -128,16 +127,16 @@ for year in range(1960, 1961):
 
         # make output filename
         if datatype == "synop":
-            filename = "mars_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,month,1), "%Y"))
+            filename = "mars_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,1,1), "%Y"))
         elif datatype == "era40":
-            filename = "mars_era40_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,month,1), "%Y"))
+            filename = "mars_era40_{}.bufr".format(dt.datetime.strftime(dt.datetime(year,1,1), "%Y"))
 
         # replace with run request and GWS once ready
         print start, end, filename
 
-        run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename, datatype = datatype))      
+        run_mars_request(start, end, os.path.join(GWS, outdir, version, "data", filename), datatype = datatype)      
 
-        break
+#        break
 
 print "finished"
 
